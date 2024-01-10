@@ -4,8 +4,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 import time
 
+#########################[에브라타임 로그인]#########################
 # ChromeDriver 경로 설정
-webdriver_service = Service('/Users/gachonswacademyo7/Documents/KAKAO/아이디어톤/chromedriver-mac-x64/chromedriver')
+webdriver_service = Service('/Users/gachonswacademyo7/Documents/KAKAO/아이디어톤/셀레니움/chromedriver-mac-x64/chromedriver')
 
 # ChromeOptions 객체 생성
 options = Options()
@@ -23,5 +24,58 @@ driver.find_element(By.NAME, 'password').send_keys('your_password')  # 비밀번
 # 로그인 버튼 클릭
 driver.find_element(By.CSS_SELECTOR, 'input[type="submit"]').click()
 
+time.sleep(10)
+
+#########################[소프트웨어학과 정보 공유 페이지]#########################
+# '소프트웨어학과 정보 공유' 링크 클릭
+link = driver.find_element(By.LINK_TEXT, '소프트웨어학과 정보 공유')
+link.click()
+
+#########################[검색]#########################
+# 검색창에 "엔터프라이즈" 입력
+search_box = driver.find_element(By.NAME, 'keyword')  # 검색창 선택
+search_box.send_keys('엔터프라이즈')  # 검색창에 "엔터프라이즈" 입력
+
+# 검색 실행(Enter 키 입력)
+from selenium.webdriver.common.keys import Keys
+search_box.send_keys(Keys.RETURN)  # Enter 키 입력
+
+time.sleep(10)
+#########################[검색결과 수집]#########################
+# 게시글 링크 리스트 수집
+post_link_list = [post.get_attribute('href') for post in driver.find_elements(By.CSS_SELECTOR, 'article.list a.article')]
+
+for post_link in post_link_list:
+    # 각 게시물에 접근
+    driver.get(post_link)
+    time.sleep(5)
+
+    # 제목, 내용
+    title = driver.find_element(By.CSS_SELECTOR, 'h2.large')
+    content = driver.find_element(By.CSS_SELECTOR, 'p.large')
+    print("제목: ", title.text)
+    print("내용: ", content.text)
+
+    # 댓글
+    ## 댓글 리스트 수집
+    comment_list = driver.find_elements(By.CSS_SELECTOR, 'article')
+    # parent_comment = ""
+    for comment in comment_list:
+        if "parent" in comment.get_attribute("class"):
+            parent_comment = comment.find_element(By.CSS_SELECTOR, 'p.large').text
+            print("댓글: ", parent_comment)
+
+        elif "child" in comment.get_attribute("class"):
+            child_comment_content = comment.find_element(By.CSS_SELECTOR, 'p.large').text
+            print("대댓글: ", child_comment_content)
+
+
+    # 뒤로 가기를 실행하여 게시물 리스트 페이지로 돌아가기
+    driver.back()
+    time.sleep(10)
+
+
 # 키 누르기 전까지 창 띄우도록
-input("클릭")
+# input("클릭")
+
+
