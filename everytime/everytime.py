@@ -11,7 +11,7 @@ pd.set_option('display.max_columns', None)  # 모든 열 출력
 pd.set_option('display.width', None)  # 출력 너비 설정
 pd.set_option('display.max_colwidth', None)  # 각 열의 최대 너비 설정
 
-#########################[에브라타임 로그인]#########################
+#########################[에브라타임 로그인] - chromedriver 설치 주소로 바꾸기 #########################
 webdriver_service = Service('/Users/gachonswacademy02/Desktop/Selenium/chromedriver-mac-x64/chromedriver')
 # webdriver_service = Service('/Users/gachonswacademyo7/Documents/KAKAO/아이디어톤/셀레니움/chromedriver-mac-x64/chromedriver')
 options = Options()
@@ -26,15 +26,15 @@ driver.find_element(By.NAME, 'password').send_keys('your-password')  # 비밀번
 driver.find_element(By.CSS_SELECTOR, 'input[type="submit"]').click()
 
 time.sleep(10)
+
 #########################[검색]#########################
 # 검색어 리스트
-# keywords = ['엔터프라이즈', '카엔프', 'KEA', '카카오']
-keywords = ['최종본임']
+keywords = ['엔터프라이즈', '카엔프', 'KEA', '카카오']
 
 #########################[검색결과 수집]#########################
 data = pd.DataFrame(columns=['제목', '내용', '댓글', '대댓글'])  # 데이터를 저장할 DataFrame 생성
 # 검색어 리스트에 있는 검색어 하나씩 순차검색
-for keyword in keywords:
+for search_keyword in keywords:
     #########################[소프트웨어학과 정보 공유 페이지]#########################
     # '소프트웨어학과 정보 공유' 링크 클릭
     link = driver.find_element(By.LINK_TEXT, '소프트웨어학과 정보 공유')
@@ -43,7 +43,7 @@ for keyword in keywords:
     # 검색창에 검색어 입력
     search_box = driver.find_element(By.NAME, 'keyword')  # 검색창 선택
     search_box.clear()  # 이전 검색어 삭제
-    search_box.send_keys(keyword)  # 검색창에 검색어 입력
+    search_box.send_keys(search_keyword)  # 검색창에 검색어 입력
 
     # 검색 실행
     from selenium.webdriver.common.keys import Keys
@@ -55,7 +55,7 @@ for keyword in keywords:
         print("페이지 전환")
         # 게시글 링크 리스트 수집
         post_link_list = [post.get_attribute('href') for post in
-                          driver.find_elements(By.CSS_SELECTOR, 'article.list a.article')][:5]
+                          driver.find_elements(By.CSS_SELECTOR, 'article.list a.article')]
 
         for post_link in post_link_list:
             # 각 게시물에 접근
@@ -114,4 +114,4 @@ for keyword in keywords:
 
 print(data)
 # 엑셀 파일로 저장
-data.to_excel('data2.xlsx', index=False)
+data.to_excel('final_data.xlsx', index=False)
