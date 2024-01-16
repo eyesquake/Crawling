@@ -7,32 +7,41 @@ from selenium.webdriver.common.keys import Keys
 import pandas as pd
 import time
 
+# pandas 설정
 pd.set_option('display.max_columns', None)  # 모든 열 출력
 pd.set_option('display.width', None)  # 출력 너비 설정
 pd.set_option('display.max_colwidth', None)  # 각 열의 최대 너비 설정
 
-#########################[에브라타임 로그인] - chromedriver 설치 주소로 바꾸기 #########################
-webdriver_service = Service('/Users/gachonswacademy02/Desktop/Selenium/chromedriver-mac-x64/chromedriver')
-# webdriver_service = Service('/Users/gachonswacademyo7/Documents/KAKAO/아이디어톤/셀레니움/chromedriver-mac-x64/chromedriver')
+#########################[에브라타임 로그인]#########################
+#chromedriver 설치 주소로 바꾸기
+# webdriver_service = Service('/Users/gachonswacademy02/Desktop/Selenium/chromedriver-mac-x64/chromedriver')
+webdriver_service = Service('/Users/gachonswacademyo7/Documents/KAKAO/아이디어톤/셀레니움/chromedriver-mac-x64/chromedriver')
 options = Options()
 driver = webdriver.Chrome(service=webdriver_service, options=options)
 
+# 에브리타임 로그인 페이지 접속
 driver.get('https://everytime.kr/login')
 
-# 로그인 정보 입력 (아이디와 비밀번호를 교체해야 합니다)
-driver.find_element(By.NAME, 'id').send_keys('your-id')  # 아이디 입력
-driver.find_element(By.NAME, 'password').send_keys('your-password')  # 비밀번호 입력
+# 로그인 정보 입력
+driver.find_element(By.NAME, 'id').send_keys('your_id')  # 아이디 입력
+driver.find_element(By.NAME, 'password').send_keys('your_password')  # 비밀번호 입력
 
+# 로그인 버튼 클릭
 driver.find_element(By.CSS_SELECTOR, 'input[type="submit"]').click()
 
+# 로그인 대기
 time.sleep(10)
+
 
 #########################[검색]#########################
 # 검색어 리스트
-keywords = ['엔터프라이즈', '카엔프', 'KEA', '카카오']
+keywords = ['사랑해', '윤서진']
+# keywords = ['엔터프라이즈', '카엔프', 'KEA', '카카오']
 
 #########################[검색결과 수집]#########################
-data = pd.DataFrame(columns=['제목', '내용', '댓글', '대댓글'])  # 데이터를 저장할 DataFrame 생성
+# 데이터를 저장할 DataFrame 생성
+data = pd.DataFrame(columns=['제목', '내용', '댓글', '대댓글']) # 데이터를 저장할 DataFrame 생성
+
 # 검색어 리스트에 있는 검색어 하나씩 순차검색
 for search_keyword in keywords:
     #########################[소프트웨어학과 정보 공유 페이지]#########################
@@ -46,7 +55,6 @@ for search_keyword in keywords:
     search_box.send_keys(search_keyword)  # 검색창에 검색어 입력
 
     # 검색 실행
-    from selenium.webdriver.common.keys import Keys
     search_box.send_keys(Keys.RETURN)  # Enter 키 입력
     time.sleep(10)
 
@@ -62,45 +70,38 @@ for search_keyword in keywords:
             driver.get(post_link)
             time.sleep(5)
 
-            # 제목, 내용
+            # 제목, 내용 수집
             title = driver.find_element(By.CSS_SELECTOR, 'h2.large').text
             content = driver.find_element(By.CSS_SELECTOR, 'p.large').text
 
-            # 댓글
-            ## 댓글 리스트 수집
+            # 댓글 리스트 수집
             comment_list = driver.find_elements(By.CSS_SELECTOR, 'article')
+
+            parent_comment = None  # 댓글 내용 초기화
+            child_comment_content = None  # 대댓글 내용 초기화
+
             for comment in comment_list:
                 if "parent" in comment.get_attribute("class"):
                     parent_comment = comment.find_element(By.CSS_SELECTOR, 'p.large').text
-
-                    # 새로운 행 생성
-                    new_row = pd.DataFrame({
-                        '제목': [title],
-                        '내용': [content],
-                        '댓글': [parent_comment],
-                        '대댓글': ['']  # 대댓글 데이터 추가
-                    })
-
-                    # 기존 DataFrame에 새로운 행 추가
-                    data = pd.concat([data, new_row], ignore_index=True)
-
+                    child_comment_content = None  # 대댓글 내용 초기화
                 elif "child" in comment.get_attribute("class"):
                     child_comment_content = comment.find_element(By.CSS_SELECTOR, 'p.large').text
 
-                    # 새로운 행 생성
-                    new_row = pd.DataFrame({
-                        '제목': [title],
-                        '내용': [content],
-                        '댓글': [''],
-                        '대댓글': [child_comment_content]  # 대댓글 데이터 추가
-                    })
+                # 새로운 행 생성
+                new_row = pd.DataFrame({
+                    '제목': [title],
+                    '내용': [content],
+                    '댓글': [parent_comment],
+                    '대댓글': [child_comment_content]  # 대댓글 데이터 추가
+                })
 
-                    # 기존 DataFrame에 새로운 행 추가
-                    data = pd.concat([data, new_row], ignore_index=True)
+                # 기존 DataFrame에 새로운 행 추가
+                data = pd.concat([data, new_row], ignore_index=True)
 
             # 뒤로 가기를 실행하여 게시물 리스트 페이지로 돌아가기
             driver.back()
             time.sleep(10)
+
         # 다음 페이지로 이동
         try:
             # '다음 페이지' 버튼 클릭
@@ -112,6 +113,5 @@ for search_keyword in keywords:
             time.sleep(5)
             break
 
-print(data)
 # 엑셀 파일로 저장
-data.to_excel('final_data.xlsx', index=False)
+data.to_excel('final.xlsx', index=False)
