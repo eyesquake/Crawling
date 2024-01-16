@@ -20,15 +20,15 @@ driver = webdriver.Chrome(service=webdriver_service, options=options)
 driver.get('https://everytime.kr/login')
 
 # 로그인 정보 입력 (아이디와 비밀번호를 교체해야 합니다)
-driver.find_element(By.NAME, 'id').send_keys('your-id')  # 아이디 입력
-driver.find_element(By.NAME, 'password').send_keys('your-password')  # 비밀번호 입력
+driver.find_element(By.NAME, 'id').send_keys('yougi8')  # 아이디 입력
+driver.find_element(By.NAME, 'password').send_keys('wldusWkd!')  # 비밀번호 입력
 
 driver.find_element(By.CSS_SELECTOR, 'input[type="submit"]').click()
 
 time.sleep(10)
 
 #########################[검색]#########################
-# 검색어 리스트
+# # 검색어 리스트
 keywords = ['엔터프라이즈', '카엔프', 'KEA', '카카오']
 
 #########################[검색결과 수집]#########################
